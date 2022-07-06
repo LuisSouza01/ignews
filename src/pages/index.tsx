@@ -1,11 +1,18 @@
-import type { NextPage } from 'next';
-import Image from 'next/image';
+import { GetServerSideProps } from 'next';
 
+import { stripe } from '../services/stripe';
 import { SubscribeButton } from '../components/SubscribeButton';
 
 import styles from './home.module.scss';
 
-const Home: NextPage = () => {
+interface HomeProps {
+  product: {
+    priceId: string;
+    amount: number;
+  }
+}
+
+export default function Home({ product }: HomeProps) {
   return (
     <main className={styles.contentContainer}>
       <section className={styles.hero}>
@@ -14,15 +21,33 @@ const Home: NextPage = () => {
 
         <p>
           Get access to all the publications <br />
-          <span>for $9.90 month</span>
+          <span>for {product.amount} month</span>
         </p>
 
-        <SubscribeButton />
+        <SubscribeButton priceId={product.priceId} />
       </section>
 
-      <Image src="/images/avatar.svg" alt="Girl Coding" />
+      <img src="/images/avatar.svg" alt="Girl Coding" />
     </main>
   )
 }
 
-export default Home
+export const getServerSideProps: GetServerSideProps = async () => {
+  const price = await stripe.prices.retrieve('price_1LIUObLTx4MkV7rn4gShHiTY');
+
+  const convertPrice = price.unit_amount ? price.unit_amount  / 100 : 0;
+
+  const product = {
+    priceId: price.id,
+    amount: new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(convertPrice)
+  }
+
+  return {
+    props: {
+      product,
+    }
+  }
+}
