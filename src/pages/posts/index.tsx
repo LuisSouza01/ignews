@@ -22,7 +22,7 @@ export default function Posts({ posts }: PostsProps) {
   return (
     <>
       <Head>
-        <title>Posts | ig.news</title>
+        <title>Post | ig.news</title>
       </Head>
 
       <main className={styles.container}>
@@ -34,7 +34,8 @@ export default function Posts({ posts }: PostsProps) {
                 <strong>{post.title}</strong>
                 <p>{post.content}</p>
               </a>
-            </Link>            
+            </Link>
+            
           ))}
         </div>
       </main>
