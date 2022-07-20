@@ -17,8 +17,6 @@ interface PostProps {
 }
 
 export default function Post({ post }: PostProps) {
-  
-
   return (
     <>
       <Head>
@@ -43,26 +41,24 @@ export default function Post({ post }: PostProps) {
 export const getServerSideProps: GetServerSideProps = async ({ req, params }) => {
   const session = await getSession({ req });
 
+  const prismic = getPrismicClient();
+
+  const response = await prismic.getByUID('posts', String(params?.slug), {});
+
   if (!session?.activeSubscription) {
     return {
       redirect: {
-        destination: '/',
+        destination: `/posts/preview/${response?.uid}`,
         permanent: false
       }
     }
   }
 
-  console.log(session);
-
-  const prismic = getPrismicClient();
-
-  const response = await prismic.getByUID('posts', String(params?.slug), {});
-
   const post = {
-    slug: response.uid,
-    title: RichText.asText(response.data.title),
-    content: RichText.asHtml(response.data.content),
-    updatedAt: new Date(response.last_publication_date).toLocaleDateString('pt-BR', {
+    slug: response?.uid,
+    title: RichText.asText(response?.data.title),
+    content: RichText.asHtml(response?.data.content),
+    updatedAt: new Date(response?.last_publication_date).toLocaleDateString('pt-BR', {
       day: '2-digit',
       month: 'long',
       year: 'numeric'
